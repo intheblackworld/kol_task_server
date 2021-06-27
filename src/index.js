@@ -11,10 +11,6 @@ const GroupAPI = require('./datasources/group')
 
 const resolvers = require('./resolvers')
 
-const { createStore } = require('./utils')
-
-const store = createStore()
-
 let db
 
 const dbClient = new MongoClient(process.env.MONGO_DB_URI, {
@@ -40,19 +36,19 @@ const server = new ApolloServer({
     // const users = await store.users.findOrCreate({ where: { email } });
     // const user = users && users[0] || null;
     // return { user: { ...user.dataValues } };
-    // if (!db) {
-    //   try {
-    //     const dbClient = new MongoClient(process.env.MONGO_DB_URI, {
-    //       useNewUrlParser: true,
-    //       useUnifiedTopology: true,
-    //     })
+    if (!db) {
+      try {
+        const dbClient = new MongoClient(process.env.MONGO_DB_URI, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
 
-    //     if (!dbClient.isConnected()) await dbClient.connect()
-    //     db = dbClient.db(process.env.MONGO_DB_NAME) // database name
-    //   } catch (e) {
-    //     console.log('--->error while connecting via graphql context (db)', e)
-    //   }
-    // }
+        if (!dbClient.isConnected()) await dbClient.connect()
+        db = dbClient.db(process.env.MONGO_DB_NAME) // database name
+      } catch (e) {
+        console.log('--->error while connecting via graphql context (db)', e)
+      }
+    }
 
     // return { db, req }
   },
