@@ -1,7 +1,7 @@
 ## Schema
 
 baseType: User, Group, Task
-```
+```javascript
 const baseTypeDefs = gql`
   type User {
     _id: ID!
@@ -34,7 +34,7 @@ const baseTypeDefs = gql`
 ```
 
 Group's query and mutation
-```
+```javascript
 const groupTypeDefs = gql`
   extend type Query {
     groups: [Group!]
@@ -59,7 +59,7 @@ const groupTypeDefs = gql`
 ```
 
 Task's query and mutation
-```
+```javascript
 const taskTypeDefs = gql`
   extend type Query {
     tasks: [Task!]
@@ -99,7 +99,7 @@ const taskTypeDefs = gql`
 
 
 User's query and mutation
-```
+```javascript
 const userTypeDefs = gql`
 
   extend type Query {
