@@ -20,7 +20,6 @@ module.exports = {
     },
 
     user(_parent, _args, { dataSources, }, _info) {
-      // const decoded = decodedToken(_context.req)
       return dataSources.userAPI.fetch(_args.id)
     },
 
@@ -42,29 +41,6 @@ module.exports = {
 
     me: (_, __, { dataSources }) => dataSources.userAPI.fetch(_args.id)
   },
-  // launches: async (_, { pageSize = 20, after }, { dataSources }) => {
-  //   const allLaunches = await dataSources.launchAPI.getAllLaunches()
-  //   // we want these in reverse chronological order
-  //   allLaunches.reverse()
-  //   const launches = paginateResults({
-  //     after,
-  //     pageSize,
-  //     results: allLaunches
-  //   })
-  //   return {
-  //     launches,
-  //     cursor: launches.length ? launches[launches.length - 1].cursor : null,
-  //     // if the cursor at the end of the paginated results is the same as the
-  //     // last item in _all_ results, then there are no more results after this
-  //     hasMore: launches.length
-  //       ? launches[launches.length - 1].cursor !==
-  //       allLaunches[allLaunches.length - 1].cursor
-  //       : false
-  //   }
-  // },
-  // launch: (_, { id }, { dataSources }) =>
-  //   dataSources.launchAPI.getLaunchById({ launchId: id }),
-  // },
 
   Mutation: {
     // @TODO add password to updateUser
@@ -77,7 +53,7 @@ module.exports = {
         password: bcrypt.hashSync(password, 3),
 
       })
-      return { ...newUser, token: jwt.sign(newUser, "kol-task") }
+      return { ...newUser, token: jwt.sign(newUser, process.env.JWT_SECRET) }
     },
 
     updateUser: async (root, args, { dataSources }, info) => {
@@ -94,7 +70,7 @@ module.exports = {
       return newUser
     },
 
-    removeGroupFromUser: async (_root, args, {dataSources}, _info) => {
+    removeGroupFromUser: async (_root, args, { dataSources }, _info) => {
       let { data: { userId, groupId } } = args
       userId = new ObjectID(userId)
       const newUser = await dataSources.userAPI.deleteGroup({ userId, groupId })
@@ -122,7 +98,7 @@ module.exports = {
       return newTask
     },
 
-    removeGroupFromTask: async (_root, args, {dataSources}, _info) => {
+    removeGroupFromTask: async (_root, args, { dataSources }, _info) => {
       let { data: { taskId, groupId } } = args
       taskId = new ObjectID(taskId)
       const newTask = await dataSources.taskAPI.deleteGroup({ taskId, groupId })
@@ -139,58 +115,21 @@ module.exports = {
     updateGroup: async (root, args, { dataSources }, info) => {
       let { data: { groupId, name } } = args
       groupId = new ObjectID(groupId)
-      console.log(groupId, 'groupId')
       const newGroup = await dataSources.groupAPI.update({ groupId, name: name })
       return newGroup
     },
 
-    loginUser: async (root, args, { prisma }, info) => {
+    login: async (_, args, { dataSources }, info) => {
       const { data: { email, password } } = args
-      const [theUser] = await prisma.users({
-        where: {
-          email
-        }
-      })
-      // @TODO check client response
-      if (!theUser) throw new Error('There is no user')
-      const isMatch = bcrypt.compareSync(password, theUser.password)
-      if (!isMatch) throw new Error('Has no authorization')
-      return { token: jwt.sign(theUser, "kol-task") }
-    },
-
-    // bookTrips: async (_, { launchIds }, { dataSources }) => {
-    //   const results = await dataSources.userAPI.bookTrips({ launchIds })
-    //   const launches = await dataSources.launchAPI.getLaunchesByIds({
-    //     launchIds,
-    //   })
-
-    //   return {
-    //     success: results && results.length === launchIds.length,
-    //     message:
-    //       results.length === launchIds.length
-    //         ? 'trips booked successfully'
-    //         : `the following launches couldn't be booked: ${launchIds.filter(
-    //           id => !results.includes(id),
-    //         )}`,
-    //     launches,
-    //   }
-    // },
-    // cancelTrip: async (_, { launchId }, { dataSources }) => {
-    //   const result = await dataSources.userAPI.cancelTrip({ launchId })
-
-    //   if (!result)
-    //     return {
-    //       success: false,
-    //       message: 'failed to cancel trip',
-    //     }
-
-    //   const launch = await dataSources.launchAPI.getLaunchById({ launchId })
-    //   return {
-    //     success: true,
-    //     message: 'trip cancelled',
-    //     launches: [launch],
-    //   }
-    // },
+      const user = await dataSources.userAPI.fetchByEmail(email)
+      if (!user.email) throw new Error('No user with that email')
+      const valid = await bcrypt.compare(password, user.password)
+      if (!valid) throw new Error('Incorrect password')
+      return {
+        ...user,
+        token: jwt.sign(user, process.env.JWT_SECRET)
+      }
+    }
   },
 
 }

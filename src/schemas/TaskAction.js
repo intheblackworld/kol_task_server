@@ -19,6 +19,7 @@ const taskTypeDefs = gql`
     description: String!
     "0 todo, 1 processing, 2 done"
     status: Int!
+    groups: [ID]
   }
 
   input TaskUpdateInput {

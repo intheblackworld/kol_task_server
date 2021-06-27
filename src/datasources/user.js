@@ -14,6 +14,24 @@ class UserAPI extends MongoDataSource {
   }
 
   // @TODO add createdTime, updatedTime
+  async fetchByEmail(email) {
+    const users = await this.findByFields({ email })
+    let user
+    if (users) {
+      user = users[0]
+      let groups = []
+      if (user.groups) {
+        groups = await Promise.all(user.groups.map(async groupId => await this.context.dataSources.groupAPI.findOneById(groupId) || null))
+      }
+
+      return {
+        ...user,
+        groups: groups.filter(g => !!g),
+      }
+    } else {
+      return null
+    }
+  }
 
   async fetch(userId) {
     const user = await this.findOneById(userId)

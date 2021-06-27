@@ -7,9 +7,7 @@ const baseTypeDefs = require('./baseType')
 const typeDefs = gql`
   type Query
 
-  type Mutation {
-    login(email: String, password: String): User
-  }
+  type Mutation
 `
 
 module.exports = [baseTypeDefs, userTypeDefs, groupTypeDefs, taskTypeDefs, typeDefs]

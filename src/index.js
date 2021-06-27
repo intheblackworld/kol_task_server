@@ -2,6 +2,8 @@ require('dotenv').config()
 const { ApolloServer } = require('apollo-server')
 const isEmail = require('isemail')
 const { MongoClient } = require('mongodb')
+const jwt = require('jsonwebtoken')
+const { decodedToken } = require('./utils')
 
 
 const typeDefs = require('./schemas')
@@ -28,6 +30,8 @@ const server = new ApolloServer({
   typeDefs, // schema
   resolvers, //  解析
   context: async ({ req }) => {
+    const decode = decodedToken(req)
+    console.log(decode)
     // simple auth check on every request
     // const auth = req.headers && req.headers.authorization || '';
     // const email = Buffer.from(auth, 'base64').toString('ascii');

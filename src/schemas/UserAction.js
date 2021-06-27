@@ -13,7 +13,7 @@ const userTypeDefs = gql`
     updateUser(data: UserUpdateInput) : User!
     addGroupToUser(data: addGroupToUserInput) : User!
     removeGroupFromUser(data: addGroupToUserInput): User!
-    loginUser(data: UserLoginInput!): AuthPayLoad!
+    login(data: UserLoginInput!): AuthPayLoad!
   }
   
   input UserCreateInput {
@@ -40,10 +40,11 @@ const userTypeDefs = gql`
   }
   
   type AuthPayLoad {
+    _id: ID
     name: String
     email: String
     role: Int
-    token: String!
+    token: String
     groups: [Group]
   }
 `
